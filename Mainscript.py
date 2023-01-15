@@ -103,9 +103,11 @@ elif selected == "a":
 locationVid = "location of the downloaded video"+videito.title+".mp4"
 locationAud = "location of the downloaded audio"+videito.title+".mp4"
 
-# Falta borrar los .mp4 que quedan de mas cuando descargamos solo audio o cuando sampleamos un video a mas de 720p
-# (no puedo hacer que ande esta parte pero no es escencial para el funcionamiento)
+"""
+Falta borrar los .mp4 que quedan de mas cuando descargamos solo audio o cuando sampleamos un video a mas de 720p
+(no puedo hacer que ande esta parte pero no es escencial para el funcionamiento)
 if path.exists(locationVid):
   remove(locationVid)
 if path.exists(locationAud):
   remove(locationAud)
+"""
