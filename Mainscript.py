@@ -7,19 +7,23 @@ from os import remove
 from os import path
 
 """
-Note: The legacy streams that contain the audio and video in a single file 
+--Nota importante de documentacion de pytube: The legacy streams that contain the audio and video in a single file 
 (referred to as “progressive download”) are still available, but only for resolutions 720p and below.
 Esto quiere decir que de 1080p para arriba hay que descargar la parte del video.mp4 por un lado y 
 el audio por otro para despues samplearlo con, por ejemplo, FFmpeg.
+--Tener instalado pytube y moviepy. (Hacerlo con comando: py -m pip install moviepy y despues lo mismo para pytube.
+-- Por defecto todos los archivos (.mp4 y .mp3) usados de por medio y/o de interes quedan en la carpeta donde esta el script.
+-- Me falta encontrar la forma de borrar los que no interesarian pero python me tira error por intentar borrar archivos que se estan procesando aun.
+-- Tambien falta meter mas tries/exceptions para hacerlo mas user-friendly con los errores de tipeo al ingresar opciones.
 """
-# Dejamos que el usuario ponga el link del video
+# Usuario pone link del video
 ingresoLink = input("ingresar link del video: ")
 # ingresoLink = "link to short video" For Debugging 
 
 # creamos el objeto tipo YouTube
 videito = YouTube(str(ingresoLink))
 
-# printeamos titulo del video para chequear
+# printeamos el titulo para chequear
 print("Titulo del video: ", videito.title)
 
 # En la siguiente linea el usuario elige que quiere. Lo ideal seria visualmente, con un desplegable.
@@ -29,7 +33,7 @@ selected = (str(election)).lower()
 
 #Si se eligio Video, damos a elegir las Resoluciones posibles
 if selected == "v":
-  ### Evaluo posibles streams (resoluciones) antes de elegir.
+  ### Primero evaluo posibles streams (resoluciones) antes de elegir.
   lista_res_posibles = []
   for i in videito.streams:
     reso = str(i)
@@ -65,12 +69,13 @@ if selected == "v":
     pickA = videito.streams.get_audio_only()
     pickA.download(filename_prefix="audio-")
 
-    ### Merging Audio+Video using moviepy
+    ### Merging Audio+Video using moviepy.
+    #Esta parte es la que mas aletarga el proceso
     videoclip = VideoFileClip("video-"+videito.title+".mp4")
     audioclip = AudioFileClip("audio-"+videito.title+".mp4")
     new_audioclip = CompositeAudioClip([audioclip])
     videoclip.audio = new_audioclip
-    videoclip.write_videofile(resolucion + "p" + videito.title + ".mp4") #Nombre con el que se guarda el archivo final
+    videoclip.write_videofile("video_" + resolucion + "p" + videito.title + ".mp4") #Nombre con el que se guarda el archivo final
     ###
 
   ## Si resolucion == 720p.
@@ -83,7 +88,7 @@ if selected == "v":
     pickV = videito.streams.get_lowest_resolution()
     pickV.download(filename_prefix="video_low_res-")
 
-# SOLO Audio,ademas QUEREMOS .mp3. Lamentablemente tenemos que crear un video+audio y despues pasarlo a MP3. 
+# SOLO AUDIO, ademas QUEREMOS .mp3. Lamentablemente tenemos que crear un video+audio y despues pasarlo a MP3. 
 # Es medio rancio pero no encontre otra forma.
 elif selected == "a":
   pickV = videito.streams.get_lowest_resolution()
@@ -92,12 +97,13 @@ elif selected == "a":
   video = mp.VideoFileClip("video-"+videito.title+".mp4")
   #Lo pasamos a mp3
   video.audio.write_audiofile(videito.title+".mp3")
-  #Faltaria paso para eliminar el .mp4
+  #Faltaria paso para eliminar el video .mp4 que quedaria al pedo.
 
+#Por si necesitamos saber como queda guardado el archivo
 locationVid = "location of the downloaded video"+videito.title+".mp4"
 locationAud = "location of the downloaded audio"+videito.title+".mp4"
 
-# Falta borrar los .mp4 que quedan al pedo cuando descargamos solo audio o cuando sampleamos un video a mas de 720p
+# Falta borrar los .mp4 que quedan de mas cuando descargamos solo audio o cuando sampleamos un video a mas de 720p
 # (no puedo hacer que ande esta parte pero no es escencial para el funcionamiento)
 if path.exists(locationVid):
   remove(locationVid)
